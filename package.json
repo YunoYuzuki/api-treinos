@@ -7,6 +7,18 @@
     "start": "node servidor.js"
   },
   "dependencies": {
-    "express": "^4.19.2"
-  }
+    "express": "^4.22.3"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YunoYuzuki/api-treinos.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/YunoYuzuki/api-treinos/issues"
+  },
+  "homepage": "https://github.com/YunoYuzuki/api-treinos#readme"
 }
