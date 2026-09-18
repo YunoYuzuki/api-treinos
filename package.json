@@ -9,7 +9,6 @@
   "dependencies": {
     "express": "^4.22.3"
   },
-  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/YunoYuzuki/api-treinos.git"

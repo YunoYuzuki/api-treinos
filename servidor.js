@@ -9,17 +9,27 @@
 // ============================================================
 
 const express = require('express');
+const { DatabaseSync } = require('node:sqlite');
+
 const app = express();
 
 // Faz o Express entender JSON no corpo das requisicoes
 app.use(express.json());
 
-// ------------------------------------------------------------
-// Os dados moram aqui, na memoria. Somem quando o servidor cai.
-// (Na Aula 03 isso vira banco de dados.)
-// ------------------------------------------------------------
-const treinos = [];
-let proximoId = 1;
+const db = new DatabaseSync('treinos.db');
+
+db.exec(`
+    CREATE TABLE IF NOT EXISTS treinos(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nome TEXT NOT NULL,
+        duracao INTEGER NOT NULL
+    )
+`);
+
+db.prepare('INSERT INTO treinos (nome, duracao) VALUES (?,?)')
+    .run('Teste de banco', 10);
+
+console.log(db.prepare('SELECT * FROM treinos').all());
 
 // ------------------------------------------------------------
 // Validacao
@@ -28,10 +38,10 @@ let proximoId = 1;
 // ------------------------------------------------------------
 function validarTreino(corpo){
     if(typeof corpo.nome !== 'string' || corpo.nome.trim() === ''){
-        return 'O campo nome eh obrigatotio e deve ser um texto';
+        return 'O campo nome eh obrigatorio e deve ser um texto.';
     }
     if(typeof corpo.duracao !== 'number' || corpo.duracao <= 0){
-        return 'O campo duracao eh obrigatorio e deve ser um numero maior que zero';
+        return 'O campo duracao eh obrigatorio e deve ser um numero maior que zero.';
     }
     return null;
 }
@@ -41,6 +51,7 @@ function validarTreino(corpo){
 // GET /treinos - lista todos os treinos
 // ------------------------------------------------------------
 app.get("/treinos", (req, res) => {
+    const treinos = db.prepare('SELECT * FROM treinos').all();
     res.status(200).json(treinos);
 });
 
@@ -50,12 +61,12 @@ app.get("/treinos", (req, res) => {
 // ------------------------------------------------------------
 app.get('/treinos', (req, res) => {
     const id = Number(res.params.id);
-    const treino = treinos.find((t) => t.id === id);
+    const treino = db.prepare('SELECT * FROM treinos WHERE id = ?');
 
     if(treino === undefined){
         return res.status(404).json({ erro : 'Treino nao encontrado'});
     }
-    res.status(400).json(treino);
+    res.status(200).json(treino);
 })
 
 
@@ -63,10 +74,18 @@ app.get('/treinos', (req, res) => {
 // POST /treinos - cria um treino (400 se os dados forem invalidos)
 // ------------------------------------------------------------
 app.post('/treinos/:id', (req, res) => {
-    const erro = validarTreino(req, body);
+    const erro = validarTreino(req.body);
     if (erro !== null){
         return res.status(400).json({ erro : erro });
     }
+
+    const resultado = db
+        .prepare('INSERT INTO treinos (nome, duracao) VALUES (?, ?)')
+        .run(req.body.nome, req.body.duracao);
+
+    const novo = db
+        .prepare('SELECT * FROM treinos WHERE id = ?')
+        .get(resultado.lastInsertRowid);
 
     const treino = {
         id : proximoId,
@@ -85,17 +104,21 @@ app.post('/treinos/:id', (req, res) => {
 // ------------------------------------------------------------
 app.put('/ treinos /: id', (req , res) => {
     const id = Number(req.params.id);
-    const treino = treinos.find((t) => t.id === id);
 
+    const treino = db.prepare('SELECT * FROM treinos WHERE id = ?').get(id);
     if (treino === undefined) {
         return res.status (404).json({ erro: 'Treino nao encontrado' });
     }
 
     const erro = validarTreino(req.body);
     if (erro !== null ){
-    
         return res.status (400).json({ erro: erro });
     }
+
+    db.prepare('UPDATE treinos SET nome = ?, duracao = ? WHERE id = ?')
+        .run(req.body.nome, req.body.duracao);
+    
+    const atualizacao = db.prepare('SELECT * FROM treinos WHERE id = ?').get(id);
 
     treino.nome = req.body.nome;
     treino.duracao = req.body.duracao;
@@ -108,14 +131,15 @@ app.put('/ treinos /: id', (req , res) => {
 // ------------------------------------------------------------
 app.delete('/ treinos /: id', (req , res) => {
     const id = Number(req.params.id);
-    const posicao = treinos.findIndex((t) => t.id === id);
 
-    if (posicao === -1) {
-        return res.status (404).json({ erro: 'Treino nao encontrado' });
+    const treino = db.params('SELECT * FROM treinos WHERE id = ?').get(id);
+    if(treino === undefined){
+        return res.status(404).json({ erro : 'Treino nao encontrado' });
     }
 
-    treinos.splice(posicao , 1);
-    res.status (204).end();
+    db.prepare('DELETE FROM treinos WHERE id = ?').run(id);
+
+    res.status(204).end();
 });
 
 
