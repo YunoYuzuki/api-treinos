@@ -26,11 +26,6 @@ db.exec(`
     )
 `);
 
-db.prepare('INSERT INTO treinos (nome, duracao) VALUES (?,?)')
-    .run('Teste de banco', 10);
-
-console.log(db.prepare('SELECT * FROM treinos').all());
-
 // ------------------------------------------------------------
 // Validacao
 // Escreva a funcao validarTreino(corpo), que devolve a mensagem
@@ -54,20 +49,6 @@ app.get("/treinos", (req, res) => {
     const treinos = db.prepare('SELECT * FROM treinos').all();
     res.status(200).json(treinos);
 });
-
-
-// ------------------------------------------------------------
-// GET /treinos/:id - busca um treino pelo id (404 se nao existir)
-// ------------------------------------------------------------
-app.get('/treinos', (req, res) => {
-    const id = Number(res.params.id);
-    const treino = db.prepare('SELECT * FROM treinos WHERE id = ?');
-
-    if(treino === undefined){
-        return res.status(404).json({ erro : 'Treino nao encontrado'});
-    }
-    res.status(200).json(treino);
-})
 
 
 // ------------------------------------------------------------
