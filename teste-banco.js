@@ -22,13 +22,17 @@ function validarTreino(corpo){
     return null;
 }
 
-const inserir = db.prepare('INSERT INTO treinos (nome, duracao) VALUES (?, ?)');
-inserir.run('Costas', 60);
-inserir.run('Peito', 45);
-inserir.run('Perna', 70);
-inserir.run('Triceps', 30);
-inserir.run('Biceps', 30);
-inserir.run('Ombro', 40);
+const total = db.prepare('SELECT COUNT(*) AS total FROM treinos').get().total;
+
+if (total === 0) {
+    const inserir = db.prepare('INSERT INTO treinos (nome, duracao) VALUES (?, ?)');
+    inserir.run('Costas', 60);
+    inserir.run('Peito', 45);
+    inserir.run('Perna', 70);
+    inserir.run('Triceps', 30);
+    inserir.run('Biceps', 30);
+    inserir.run('Ombro', 40);
+}
 
 app.get('/treinos/total', (req, res) => {
     const resultado = db.prepare('SELECT COUNT(*) AS total FROM treinos').get();
@@ -62,17 +66,33 @@ app.get('/treinos', (req, res) => {
 
     if (req.query.busca !== undefined) {
         condicoes.push('nome LIKE ?');
-        valores.push(`%${req.query.busca}%`); // o % vai no valor, nunca no SQL
+        valores.push(`%${req.query.busca}%`);
     }
 
     if (condicoes.length > 0) {
         sql += ' WHERE ' + condicoes.join(' AND ');
     }
 
-    sql += ' ORDER BY duracao DESC'; // maior para a menor
+    sql += ' ORDER BY duracao DESC';
 
     const treinos = db.prepare(sql).all(...valores);
     res.status(200).json(treinos);
+});
+
+app.get('/treinos/:id', (req, res) => {
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+        return res.status(400).json({ erro: 'O id deve ser um número inteiro positivo.' });
+    }
+
+    const treino = db.prepare('SELECT * FROM treinos WHERE id = ?').get(id);
+
+    if (!treino) {
+        return res.status(404).json({ erro: 'Treino não encontrado.' });
+    }
+
+    res.status(200).json(treino);
 });
 
 const porta = 3000;
