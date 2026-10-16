@@ -17,5 +17,14 @@ function criar(nome, duracao){
 }
 
 function atualizar(id, nome, duracao){
-    db.prepare('UPDATE treinos SET nome = ?, ')
+    db.prepare('UPDATE treinos SET nome = ?, duracao = ? WHERE id = ?')
+        .run(nome, duracao, id);
+    return buscarPorId(id);
 }
+
+function remover(id){
+    const resultado = db.prepare('DELETE FROM treinos WHERE id = ?').run(id);
+    return resultado.changes > 0;
+}
+
+module.exports = { listarTodos, buscarPorId, criar, atualizar, remover };
