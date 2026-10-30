@@ -1,5 +1,7 @@
+const express = require('express');
+
 const app = express();
-const db = require('api-treinos/banco.js')
+const db = require('../banco.js')
 
 function listarTodos(){
     return db.prepare('SELECT * FROM treinos').all();
@@ -13,7 +15,7 @@ function criar(nome, duracao){
     const resultado = db
         .prepare('INSERT INTO treinos (nome, duracao) VALUES (?, ?)')
         .run(nome, duracao);
-    return buscarPorId(id);
+    return buscarPorId(resultado.lastInsertRowid);
 }
 
 function atualizar(id, nome, duracao){

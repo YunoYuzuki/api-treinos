@@ -1,4 +1,5 @@
-const repository = require('api-treinos/repositories/treinosRepository.js')
+const repository = require('../repositories/treinosRepository.js');
+
 
 function validarTreino(corpo){
     if(typeof corpo.nome !== 'string' || corpo.nome.trim() === ''){
@@ -10,6 +11,51 @@ function validarTreino(corpo){
     return null;
 }
 
-function limparTodos(){
-    return repository.limparTodos();
+function listarTodos(){
+    return repository.listarTodos();
 }
+
+function buscarPorId(id){
+    return repository.buscarPorId(id);
+}
+
+function criarTreino(corpo){
+    const erro = validarTreino(corpo);
+    if(erro !== null){
+        return { erro: erro };
+    }
+    const novo = repository.criar(corpo.nome, corpo.duracao);
+    return { treino: novo };
+}
+
+function atualizarTreino(id, corpo){
+    const existente = repository.buscarPorId(id);
+    if(existente === undefined){
+        return { naoEncontrado : true };
+    }
+
+    const erro = validarTreino(corpo);
+    if(erro !== null){
+        return { erro : erro };
+    }
+
+    const atualizado = repository.atualizar(id, corpo.nome, corpo.duracao);
+    return { treino: atualizado };
+}
+
+function removerTreino(id){
+    const existente = repository.buscarPorId(id);
+    if(existente === undefined){
+        return { naoEncontrado : true };
+    }
+    repository.remover(id);
+    return { removido: true };
+}
+
+module.exports = {
+    listarTodos,
+    buscarPorId,
+    criarTreino,
+    atualizarTreino,
+    removerTreino,
+};
