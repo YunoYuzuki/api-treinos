@@ -15,7 +15,7 @@ app.post('/login', authController.login);
 app.get('/perfil', authController.perfil);
 app.post('/logout', authController.logout);
 
-const PORTA = 3001;
+const PORTA = 3000;
 app.listen(PORTA, () => {
     console.log(`Servidor ligadinho pra vc bb: http://localhost:${PORTA}`);
 });
