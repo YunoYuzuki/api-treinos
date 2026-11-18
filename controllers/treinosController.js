@@ -38,7 +38,7 @@ function atualizar(req, res){
     res.status(200).json(resultado.treino);
 }
 
-// corrigido git feito por esse maldito do pedro htts bla bla bla
+
 
 function remover(req, res){
     const id = Number(req.params.id);
