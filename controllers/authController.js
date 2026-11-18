@@ -34,6 +34,9 @@ function usuarioDaRequisicao(req){
     const token = lerCookie(req, 'sid');
     if(token === null) return null;
 
+    const id = sessoes.usuarioIdDaSessao(token);
+    if(id === undefined) return null;
+
     return usuariosRepository.buscarPorId(id);
 }
 

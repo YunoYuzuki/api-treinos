@@ -32,7 +32,7 @@ function atualizar(req, res){
         return res.status(404).json({ erro: 'Treino nóti fáundedi' });
     }
 
-    if(resultado !== undefined){
+    if(resultado.erro !== undefined){
         return res.status(400).json({ erro: resultado.erro });
     }
     res.status(200).json(resultado.treino);

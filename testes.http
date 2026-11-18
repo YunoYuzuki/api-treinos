@@ -14,12 +14,13 @@ GET {{url}}/treinos
 
 
 ### 2 - Criar um treino                    -> espera 201
-POST {{url}}/treinos
+### Criar treino
+POST http://localhost:3000/treinos
 Content-Type: application/json
 
 {
-    "nome": "Peito e triceps",
-    "duracao": 60
+    "nome": "Abdomen",
+    "duracao": 30
 }
 
 
@@ -90,3 +91,15 @@ DELETE {{url}}/treinos/99999
 
 ### 12 - Listar de novo pra conferir       -> espera 200
 GET {{url}}/treinos
+
+### Login
+POST http://localhost:3000/login
+Content-Type: application/json
+
+{
+  "usuario": "diego",
+  "senha": "1234"
+}
+
+### Perfil
+GET http://localhost:3000/perfil
